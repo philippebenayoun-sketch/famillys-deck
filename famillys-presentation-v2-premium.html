@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Famillys - Présentation (v2)</title>
+
+<!-- Optional: modern, institutional typography (system fonts, no external deps) -->
+<style>
+  :root{
+    --bg0:#0b1220;
+    --bg1:#0f1b33;
+    --bg2:#0b2a3a;
+    --card:rgba(255,255,255,.06);
+    --card2:rgba(255,255,255,.08);
+    --border:rgba(255,255,255,.12);
+    --text:#eef3ff;
+    --muted:rgba(238,243,255,.72);
+    --muted2:rgba(238,243,255,.55);
+    --accent:#56cfe1;     /* reassuring teal */
+    --accent2:#7aa2ff;    /* calm blue */
+    --ok:#43e97b;
+    --warn:#ffd166;
+    --shadow: 0 18px 55px rgba(0,0,0,.45);
+    --radius: 18px;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background:
+      radial-gradient(900px 500px at 15% 8%, rgba(86,207,225,.20), transparent 60%),
+      radial-gradient(800px 450px at 85% 12%, rgba(122,162,255,.18), transparent 55%),
+      radial-gradient(700px 420px at 55% 92%, rgba(67,233,123,.10), transparent 55%),
+      linear-gradient(180deg, var(--bg0), #070c16 60%);
+    color: var(--text);
+    overflow-x:hidden;
+  }
+
+  /* Presentation */
+  .presentation{ width:100%; height:100vh; position:relative; }
+
+  /* Slides with smooth crossfade */
+  .slide{
+    width:100%; height:100vh;
+    position:absolute; inset:0;
+    padding: 56px 72px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    opacity:0;
+    transform: translateY(10px);
+    pointer-events:none;
+    transition: opacity .55s ease, transform .55s ease;
+  }
+  .slide.active{
+    opacity:1;
+    transform: translateY(0);
+    pointer-events:auto;
+  }
+
+  /* Global slide chrome */
+  .topbar{
+    position:fixed; top:18px; left:22px; right:22px;
+    display:flex; align-items:center; justify-content:space-between;
+    z-index:200;
+    pointer-events:none;
+  }
+  .brand{
+    pointer-events:auto;
+    display:flex; align-items:center; gap:10px;
+    padding:10px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+  }
+  .mark{
+    width:32px; height:32px; border-radius:10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow: 0 10px 30px rgba(86,207,225,.25);
+  }
+  .brand .name{ font-weight:900; letter-spacing:.14em; font-size:12px; opacity:.9; }
+  .brand .sub{ font-size:12px; color: var(--muted2); margin-left:6px; letter-spacing:.02em; }
+
+  .counter{
+    pointer-events:auto;
+    font-size: 12px;
+    color: var(--muted2);
+    padding:10px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+  }
+
+  .progress{
+    pointer-events:none;
+    position:fixed; top:0; left:0; right:0; height:3px; z-index:250;
+    background: rgba(255,255,255,.08);
+  }
+  .progress > div{
+    height:100%;
+    width: calc((var(--cur,1) / var(--n,1)) * 100%);
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    box-shadow: 0 0 22px rgba(86,207,225,.35);
+    transition: width .35s ease;
+  }
+
+  /* Navigation */
+  .nav{
+    position:fixed; bottom: 24px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap: 14px; z-index:220;
+    padding:10px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+  }
+  .nav button{
+    border:0;
+    color: var(--text);
+    background: rgba(255,255,255,.08);
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor:pointer;
+    font-size: 13px;
+    font-weight:700;
+    letter-spacing:.01em;
+    transition: transform .15s ease, background .2s ease, opacity .2s ease;
+  }
+  .nav button:hover{ background: rgba(255,255,255,.14); transform: translateY(-1px); }
+  .nav button:active{ transform: translateY(0); }
+  .nav button:disabled{ opacity:.35; cursor:default; transform:none; }
+  .dots{ display:flex; gap:8px; align-items:center; padding: 0 4px; }
+  .dot{
+    width: 8px; height: 8px; border-radius:50%;
+    background: rgba(255,255,255,.25);
+    cursor:pointer;
+    transition: transform .15s ease, background .2s ease;
+  }
+  .dot.active{ background: var(--accent); transform: scale(1.45); }
+
+  /* Typography */
+  h1{ font-size: clamp(34px, 3.7vw, 56px); line-height: 1.08; letter-spacing: -.02em; }
+  h2{ font-size: clamp(28px, 3.1vw, 44px); line-height: 1.12; letter-spacing: -.015em; }
+  h3{ font-size: 18px; line-height:1.2; letter-spacing:-.01em; }
+  p{ color: var(--muted); font-size: 16px; line-height: 1.65; }
+
+  .kicker{
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: rgba(238,243,255,.72);
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 18px;
+  }
+  .kicker::before{
+    content:"";
+    width: 22px; height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity:.9;
+  }
+
+  /* Layout helpers */
+  .wrap{ max-width: 1100px; }
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+    margin-top: 22px;
+  }
+  .col-4{ grid-column: span 4; }
+  .col-6{ grid-column: span 6; }
+  .col-8{ grid-column: span 8; }
+  .col-12{ grid-column: span 12; }
+
+  .card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+  }
+  .card.soft{ background: rgba(255,255,255,.045); box-shadow: none; }
+  .card:hover{ transform: translateY(-3px); transition: transform .18s ease; }
+
+  .metric{
+    display:flex; flex-direction:column; gap:6px;
+    padding: 18px 18px;
+  }
+  .metric .num{ font-weight: 900; font-size: 30px; letter-spacing:-.02em; color: var(--accent); }
+  .metric .lbl{ font-size: 12px; color: var(--muted2); letter-spacing:.02em; }
+
+  .pill{
+    display:inline-flex; align-items:center; gap:10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(86,207,225,.10);
+    border: 1px solid rgba(86,207,225,.25);
+    color: rgba(238,243,255,.86);
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 20px;
+  }
+
+  .list{
+    display:flex; flex-direction:column; gap: 10px;
+  }
+  .step{
+    display:flex; gap: 14px; align-items:flex-start;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.10);
+  }
+  .badgeNum{
+    width: 30px; height: 30px; border-radius: 10px;
+    display:flex; align-items:center; justify-content:center;
+    font-weight: 900;
+    background: rgba(122,162,255,.16);
+    border: 1px solid rgba(122,162,255,.25);
+    color: rgba(238,243,255,.9);
+    flex-shrink:0;
+  }
+  .step strong{ color: rgba(238,243,255,.92); }
+  .step p{ font-size: 14px; color: rgba(238,243,255,.75); line-height: 1.55; }
+
+  .priceBox{
+    display:flex; align-items:center; gap: 16px; flex-wrap: wrap;
+    margin-top: 18px;
+  }
+  .priceTag{
+    display:inline-flex; flex-direction:column; align-items:flex-start;
+    padding: 14px 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(86,207,225,.22), rgba(122,162,255,.14));
+    border: 1px solid rgba(255,255,255,.12);
+  }
+  .priceTag .amount{ font-size: 34px; font-weight: 950; letter-spacing:-.02em; }
+  .priceTag .sub{ font-size: 12px; color: rgba(238,243,255,.70); margin-top: 2px; }
+  .noteBox{
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.10);
+    color: rgba(238,243,255,.78);
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 520px;
+  }
+
+  .ctaRow{
+    display:flex; gap: 14px; align-items:stretch; margin-top: 20px; flex-wrap:wrap;
+  }
+  .cta{
+    display:flex; flex-direction:column; justify-content:center;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(67,233,123,.18), rgba(56,249,215,.10));
+    border: 1px solid rgba(67,233,123,.25);
+    color: rgba(238,243,255,.90);
+    flex: 1;
+    min-width: 260px;
+  }
+  .cta .top{ font-weight: 900; font-size: 14px; letter-spacing:.01em; }
+  .cta .sub{ color: rgba(238,243,255,.70); font-size: 13px; margin-top: 6px; }
+
+  .contactCards{ display:flex; gap: 14px; justify-content:center; flex-wrap:wrap; margin-top: 22px; }
+  .cc{
+    min-width: 220px;
+    padding: 18px 20px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(10px);
+  }
+  .cc .lbl{ font-size: 12px; color: var(--muted2); margin-top: 6px; }
+  .cc .val{ font-size: 16px; font-weight: 900; color: rgba(238,243,255,.92); letter-spacing:-.01em; margin-top: 6px; }
+  .cc a{ color: rgba(238,243,255,.92); text-decoration:none; }
+  .cc a:hover{ text-decoration:underline; }
+
+  /* Slide backgrounds (institutional / reassuring) */
+  .s1{ background: linear-gradient(135deg, rgba(15,27,51,.85), rgba(11,18,32,.92)); }
+  .s2{ background: linear-gradient(135deg, rgba(11,18,32,.92), rgba(9,26,40,.92)); }
+  .s3{ background: linear-gradient(135deg, rgba(11,18,32,.92), rgba(15,27,51,.90)); }
+  .s4{ background: linear-gradient(135deg, rgba(12,18,36,.92), rgba(13,30,44,.90)); }
+  .s5{ background: linear-gradient(135deg, rgba(11,18,32,.92), rgba(10,24,40,.90)); }
+  .s6{ background: linear-gradient(135deg, rgba(11,18,32,.92), rgba(16,26,42,.90)); }
+  .s7{ background: linear-gradient(135deg, rgba(11,18,32,.92), rgba(9,26,40,.92)); }
+  .s8{ background: linear-gradient(135deg, rgba(15,27,51,.92), rgba(11,18,32,.94)); text-align:center; align-items:center; }
+
+  /* Responsive */
+  @media (max-width: 980px){
+    .slide{ padding: 44px 20px; }
+    .grid{ gap: 12px; }
+    .col-4,.col-6,.col-8{ grid-column: span 12; }
+    .presentation{ height:100svh; }
+    .slide{ height:100svh; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .slide{ transition:none; transform:none; }
+    .nav button{ transition:none; }
+  }
+</style>
+</head>
+
+<body>
+  <div class="progress"><div id="bar"></div></div>
+
+  <div class="topbar">
+    <div class="brand" aria-label="Brand">
+      <div class="mark" aria-hidden="true"></div>
+      <div style="display:flex; align-items:baseline;">
+        <div class="name">FAMILLYS</div>
+        <div class="sub">Hébergement familial · Seniors</div>
+      </div>
+    </div>
+    <div class="counter" id="counter">1 / 8</div>
+  </div>
+
+  <div class="presentation" id="presentation">
+
+    <!-- Slide 1 -->
+    <section class="slide s1 active">
+      <div class="wrap">
+        <div class="kicker">Constat</div>
+        <h1>Pour les familles, gérer l’hébergement d’un parent âgé peut devenir un <span style="color:var(--accent)">deuxième métier</span>.</h1>
+        <p style="margin-top:14px; max-width: 820px;">
+          Recherches, démarches, aides, coordination… <strong style="color:rgba(238,243,255,.92)">Famillys</strong> réduit la charge mentale
+          et sécurise le parcours, pour que vous puissiez vous concentrer sur l’essentiel : votre proche.
+        </p>
+
+        <div class="grid" style="margin-top:26px;">
+          <div class="card col-4 soft">
+            <div style="font-size:28px;margin-bottom:8px;">🧭</div>
+            <h3>Clarté</h3>
+            <p style="margin-top:6px;">Un parcours guidé, des étapes lisibles, des documents prêts.</p>
+          </div>
+          <div class="card col-4 soft">
+            <div style="font-size:28px;margin-bottom:8px;">🛡️</div>
+            <h3>Sécurité</h3>
+            <p style="margin-top:6px;">Réseau agréé et contrôlé, suivi, cadre administratif sécurisé.</p>
+          </div>
+          <div class="card col-4 soft">
+            <div style="font-size:28px;margin-bottom:8px;">🤝</div>
+            <h3>Accompagnement</h3>
+            <p style="margin-top:6px;">Une équipe joignable, des conseils concrets, une continuité assurée.</p>
+          </div>
+        </div>
+
+        <div class="pill">✅ Familles d’accueil agréées par le Conseil Départemental</div>
+      </div>
+    </section>
+
+    <!-- Slide 2 -->
+    <section class="slide s2">
+      <div class="wrap">
+        <div class="kicker">Qui sommes-nous</div>
+        <h2>Le réseau de référence des familles d’accueil pour seniors</h2>
+        <p style="margin-top:10px; max-width: 940px;">
+          Entreprise de l’Économie Sociale et Solidaire créée en 2020, Famillys accompagne la recherche et la gestion
+          d’un hébergement en famille d’accueil. Les familles du réseau sont <strong style="color:var(--accent)">agréées</strong>,
+          formées, et contrôlées régulièrement afin de garantir qualité et sécurité.
+        </p>
+
+        <div class="grid" style="margin-top:22px;">
+          <div class="card col-3 metric">
+            <div class="num">+1 900</div>
+            <div class="lbl">familles accompagnées depuis 2020</div>
+          </div>
+          <div class="card col-3 metric">
+            <div class="num">10 000</div>
+            <div class="lbl">familles d’accueil en France</div>
+          </div>
+          <div class="card col-3 metric">
+            <div class="num">1 250 €</div>
+            <div class="lbl">reste à charge moyen / mois*</div>
+          </div>
+          <div class="card col-3 metric">
+            <div class="num">100%</div>
+            <div class="lbl">familles agréées</div>
+          </div>
+        </div>
+
+        <p style="margin-top:14px; font-size:12px; color:var(--muted2); max-width: 900px;">
+          *Estimation moyenne après aides (selon situation et département).
+        </p>
+      </div>
+    </section>
+
+    <!-- Slide 3 -->
+    <section class="slide s3">
+      <div class="wrap">
+        <div class="kicker">La solution</div>
+        <h2>L’accueil familial : une alternative humaine et sécurisée à l’EHPAD</h2>
+        <p style="margin-top:10px; max-width: 900px;">
+          Votre proche est accueilli au domicile d’une famille professionnelle agréée, dans un cadre de vie chaleureux.
+          La prise en charge s’adapte aux besoins, avec un suivi administratif et une coordination facilitée.
+        </p>
+
+        <div class="grid" style="margin-top:22px;">
+          <div class="card col-4">
+            <div style="font-size:26px;margin-bottom:8px;">👨‍👩‍👧</div>
+            <h3>Taille humaine</h3>
+            <p style="margin-top:6px;">Accueil limité, relation de confiance, quotidien personnalisé.</p>
+          </div>
+          <div class="card col-4">
+            <div style="font-size:26px;margin-bottom:8px;">🏥</div>
+            <h3>Suivi médical</h3>
+            <p style="margin-top:6px;">Médecin, infirmiers, kiné à domicile (selon situation).</p>
+          </div>
+          <div class="card col-4">
+            <div style="font-size:26px;margin-bottom:8px;">🎓</div>
+            <h3>Agréé & encadré</h3>
+            <p style="margin-top:6px;">Familles formées et contrôlées par le département.</p>
+          </div>
+          <div class="card col-4">
+            <div style="font-size:26px;margin-bottom:8px;">🔓</div>
+            <h3>Flexibilité</h3>
+            <p style="margin-top:6px;">Visites libres, sorties, séjours temporaires possibles.</p>
+          </div>
+          <div class="card col-4">
+            <div style="font-size:26px;margin-bottom:8px;">🧠</div>
+            <h3>Pathologies possibles</h3>
+            <p style="margin-top:6px;">Selon l’accueil : Alzheimer, Parkinson, mobilité réduite…</p>
+          </div>
+          <div class="card col-4">
+            <div style="font-size:26px;margin-bottom:8px;">💬</div>
+            <h3>Moins de charge mentale</h3>
+            <p style="margin-top:6px;">Accompagnement à chaque étape, documents et conseils.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 4 -->
+    <section class="slide s4">
+      <div class="wrap">
+        <div class="kicker">Étape 1 · Recherche & mise en relation</div>
+        <h2>Trouver la famille d’accueil adaptée, sereinement</h2>
+        <p style="margin-top:10px; max-width: 900px;">
+          Une prise en charge complète : évaluation des besoins, sélection ciblée, et accompagnement jusqu’à l’emménagement,
+          avec un suivi garanti sur 1 an.
+        </p>
+
+        <div class="grid" style="margin-top:18px;">
+          <div class="card col-8">
+            <div class="list">
+              <div class="step"><div class="badgeNum">1</div><p><strong>Diagnostic approfondi</strong> — besoins, pathologie, zone géographique</p></div>
+              <div class="step"><div class="badgeNum">2</div><p><strong>Accès à la base documentaire</strong> — modèles, contrats, fiches pratiques</p></div>
+              <div class="step"><div class="badgeNum">3</div><p><strong>Propositions ciblées</strong> — sous 48h à 7 jours selon disponibilité</p></div>
+              <div class="step"><div class="badgeNum">4</div><p><strong>Accompagnement emménagement</strong> — contrat, URSSAF, déclaration employeur</p></div>
+              <div class="step"><div class="badgeNum">5</div><p><strong>Suivi 1 an</strong> — assistance et solution de repli si nécessaire</p></div>
+            </div>
+          </div>
+
+          <div class="card col-4">
+            <div class="priceBox" style="margin-top:0;">
+              <div class="priceTag">
+                <div class="amount">349 € TTC</div>
+                <div class="sub">Paiement unique</div>
+              </div>
+              <div class="noteBox">
+                🛡️ <strong style="color:rgba(238,243,255,.92)">Garantie remboursement</strong><br>
+                Si aucune famille disponible (département + limitrophes) dans les 3 mois, les frais de recherche sont remboursés sur simple demande.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 5 -->
+    <section class="slide s5">
+      <div class="wrap">
+        <div class="kicker">Étape 2 · Suivi mensuel</div>
+        <h2>Sérénité Essentielle</h2>
+
+        <div class="priceBox">
+          <div class="priceTag">
+            <div class="amount">49 € / mois</div>
+            <div class="sub">Sans engagement</div>
+          </div>
+          <div class="noteBox">
+            Un socle fiable pour rester conforme, éviter les erreurs, et garder un interlocuteur disponible au quotidien.
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:18px;">
+          <div class="card col-4"><h3>📄 Fiches de paie mensuelles</h3><p style="margin-top:6px;">Élaborées et envoyées en votre nom.</p></div>
+          <div class="card col-4"><h3>🏛️ Déclaration URSSAF</h3><p style="margin-top:6px;">Cotisations, heures, exonérations applicables.</p></div>
+          <div class="card col-4"><h3>⚖️ Formalités & contrat</h3><p style="margin-top:6px;">Avenants, veille réglementaire, suivi GIR.</p></div>
+          <div class="card col-4"><h3>📁 Archivage</h3><p style="margin-top:6px;">Conservation et organisation des documents.</p></div>
+          <div class="card col-4"><h3>📞 Conseils</h3><p style="margin-top:6px;">2h de conseils / mois, accompagnement régulier.</p></div>
+          <div class="card col-4"><h3>🤝 Médiation</h3><p style="margin-top:6px;">Facilitateur entre vous et la famille d’accueil.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 6 -->
+    <section class="slide s6">
+      <div class="wrap">
+        <div class="kicker">Étape 2 · Suivi mensuel premium</div>
+        <h2>Sérénité Intégrale</h2>
+
+        <div class="priceBox">
+          <div class="priceTag">
+            <div class="amount">99 € / mois</div>
+            <div class="sub">Sans engagement</div>
+          </div>
+          <div class="noteBox">
+            Inclut tout le <strong style="color:rgba(238,243,255,.92)">Sérénité Essentielle</strong>, avec un accompagnement renforcé sur aides,
+            protection, et continuité.
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:18px;">
+          <div class="card col-4"><h3>🏦 Dossiers APA & MDPH</h3><p style="margin-top:6px;">Constitution complète des dossiers d’aides.</p></div>
+          <div class="card col-4"><h3>📱 Accès illimité expert</h3><p style="margin-top:6px;">Interlocuteur dédié, réactif sans limitation.</p></div>
+          <div class="card col-4"><h3>🧾 Attestations fiscales</h3><p style="margin-top:6px;">Crédit d’impôt + transmission au département.</p></div>
+          <div class="card col-4"><h3>⚖️ Protection juridique</h3><p style="margin-top:6px;">Tutelle, curatelle, mandat de protection future.</p></div>
+          <div class="card col-4"><h3>🏠 Accompagnement patrimonial</h3><p style="margin-top:6px;">Conseil dédié (ex. vente d’un bien).</p></div>
+          <div class="card col-4"><h3>💳 Gestion financière</h3><p style="margin-top:6px;">Prélèvement et paiement direct à la famille.</p></div>
+          <div class="card col-4"><h3>📓 Cahier digital</h3><p style="margin-top:6px;">Suivi quotidien partagé avec la famille.</p></div>
+          <div class="card col-4"><h3>🕊️ Soutien après décès</h3><p style="margin-top:6px;">Démarches, organismes, modèles de lettres.</p></div>
+          <div class="card col-4"><h3>🔄 Continuité garantie</h3><p style="margin-top:6px;">Relais si besoin, accompagnement prolongé.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 7 -->
+    <section class="slide s7">
+      <div class="wrap">
+        <div class="kicker">Synthèse</div>
+        <h2>Un parcours simple, des choix clairs</h2>
+        <p style="margin-top:10px; max-width: 900px;">
+          Vous commencez par la mise en relation (paiement unique). Ensuite, vous choisissez le niveau de suivi mensuel,
+          ajustable à tout moment.
+        </p>
+
+        <div class="grid" style="margin-top:18px;">
+          <div class="card col-4">
+            <h3>Étape 1</h3>
+            <p style="margin-top:8px; color:var(--muted2); font-size:13px;">Recherche & mise en relation</p>
+            <div style="margin-top:10px; font-size:34px; font-weight:950; color:var(--accent);">349 €</div>
+            <p style="margin-top:6px; font-size:13px;">Paiement unique · Garantie remboursement 3 mois*</p>
+          </div>
+
+          <div class="card col-4">
+            <h3>Étape 2</h3>
+            <p style="margin-top:8px; color:var(--muted2); font-size:13px;">Sérénité Essentielle</p>
+            <div style="margin-top:10px; font-size:34px; font-weight:950; color:var(--warn);">49 €</div>
+            <p style="margin-top:6px; font-size:13px;">/ mois · Sans engagement</p>
+          </div>
+
+          <div class="card col-4">
+            <h3>Étape 2</h3>
+            <p style="margin-top:8px; color:var(--muted2); font-size:13px;">Sérénité Intégrale</p>
+            <div style="margin-top:10px; font-size:34px; font-weight:950; color:rgba(255,159,28,.95);">99 €</div>
+            <p style="margin-top:6px; font-size:13px;">/ mois · Sans engagement</p>
+          </div>
+
+          <div class="ctaRow col-12">
+            <div class="cta">
+              <div class="top">Changement d’offre possible à tout moment</div>
+              <div class="sub">Sans frais ni pénalités · Le contrat prend effet le jour de l’emménagement.</div>
+            </div>
+            <div class="noteBox" style="max-width:none; flex:1; min-width:260px;">
+              *Remboursement si aucune famille disponible (département + limitrophes) dans les 3 mois.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Slide 8 -->
+    <section class="slide s8">
+      <div class="wrap" style="max-width: 980px;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+          <div style="width:64px;height:64px;border-radius:22px;background:linear-gradient(135deg,var(--accent),var(--accent2)); box-shadow:0 20px 60px rgba(86,207,225,.25);"></div>
+          <div style="font-size:44px; font-weight: 950; letter-spacing:.18em;">FAMILLYS</div>
+          <p style="max-width: 760px; color: var(--muted); font-size: 18px;">
+            Vous concentrer sur votre proche. Nous nous occupons du reste.
+          </p>
+        </div>
+
+        <div class="contactCards">
+          <div class="cc">
+            <div style="font-size:22px;">📞</div>
+            <div class="val">0801 27 00 90</div>
+            <div class="lbl">Appel gratuit</div>
+          </div>
+          <div class="cc">
+            <div style="font-size:22px;">🌐</div>
+            <div class="val"><a href="https://famillys.fr" target="_blank" rel="noopener">famillys.fr</a></div>
+            <div class="lbl">Diagnostic gratuit en ligne</div>
+          </div>
+          <div class="cc">
+            <div style="font-size:22px;">✉️</div>
+            <div class="val"><a href="mailto:contact@famillys.fr">contact@famillys.fr</a></div>
+            <div class="lbl">Réponse sous 24h</div>
+          </div>
+        </div>
+
+        <p style="margin-top:18px; color: var(--muted2); font-size: 13px;">
+          Famillys est une entreprise de l’Économie Sociale et Solidaire — zéro dividende, 100% au service des familles.
+        </p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav" role="navigation" aria-label="Navigation des slides">
+    <button id="prev" onclick="changeSlide(-1)" disabled>← Précédent</button>
+    <div class="dots" id="dots" aria-label="Pagination"></div>
+    <button id="next" onclick="changeSlide(1)">Suivant →</button>
+  </div>
+
+<script>
+  let cur = 0;
+  const slides = document.querySelectorAll('.slide');
+  const n = slides.length;
+
+  const dotsEl = document.getElementById('dots');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const counterEl = document.getElementById('counter');
+  const bar = document.getElementById('bar');
+  const root = document.documentElement;
+
+  // Build dots
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('role','button');
+    d.setAttribute('tabindex','0');
+    d.setAttribute('aria-label', 'Aller à la diapositive ' + (i + 1));
+    d.onclick = () => goTo(i);
+    d.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') goTo(i); };
+    dotsEl.appendChild(d);
+  }
+
+  function setChrome(){
+    counterEl.textContent = (cur + 1) + ' / ' + n;
+    prevBtn.disabled = cur === 0;
+    nextBtn.disabled = cur === n - 1;
+
+    root.style.setProperty('--cur', (cur + 1));
+    root.style.setProperty('--n', n);
+
+    // update dots
+    document.querySelectorAll('.dot').forEach((el, idx) => {
+      el.classList.toggle('active', idx === cur);
+    });
+  }
+
+  function goTo(idx){
+    if (idx < 0 || idx >= n || idx === cur) return;
+
+    slides[cur].classList.remove('active');
+    cur = idx;
+    slides[cur].classList.add('active');
+    setChrome();
+  }
+
+  function changeSlide(dir){
+    goTo(cur + dir);
+  }
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') changeSlide(1);
+    if (e.key === 'ArrowLeft') changeSlide(-1);
+    if (e.key === 'Home') goTo(0);
+    if (e.key === 'End') goTo(n - 1);
+  });
+
+  // Touch swipe (mobile)
+  let startX = null, startY = null;
+  const pres = document.getElementById('presentation');
+
+  pres.addEventListener('touchstart', (e) => {
+    if (!e.touches || e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, {passive:true});
+
+  pres.addEventListener('touchend', (e) => {
+    if (startX === null || startY === null) return;
+    const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+    if (!t) return;
+
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+
+    // horizontal swipe threshold
+    if (Math.abs(dx) > 55 && Math.abs(dy) < 60) {
+      if (dx < 0) changeSlide(1);
+      else changeSlide(-1);
+    }
+    startX = startY = null;
+  }, {passive:true});
+
+  // init
+  setChrome();
+</script>
+</body>
+</html>
