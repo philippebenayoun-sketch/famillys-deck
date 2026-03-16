@@ -1,1 +1,415 @@
-file:///C:/Users/pbena/Downloads/ag2r-presentation.html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f4f0; color: #1a1a1a; height:100vh; overflow:hidden; }
+
+.pres { width:100%; height:100vh; position:relative; }
+
+.slide {
+  display:none; width:100%; height:100vh;
+  position:absolute; top:0; left:0;
+  padding: 52px 72px 80px;
+  flex-direction:column; justify-content:center;
+}
+.slide.active { display:flex; }
+
+/* Nav */
+.nav {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:14px; z-index:100;
+}
+.nav button {
+  background:#fff; border:1px solid #d0cfc8; color:#333;
+  padding:9px 22px; border-radius:20px; cursor:pointer;
+  font-size:13px; transition:all .15s;
+}
+.nav button:hover { background:#f0efe8; }
+.nav button:disabled { opacity:.3; cursor:default; }
+.dots { display:flex; gap:7px; }
+.dot { width:7px; height:7px; border-radius:50%; background:#bbb; cursor:pointer; transition:all .2s; }
+.dot.active { background:#2d4a7a; transform:scale(1.35); }
+.counter { position:fixed; top:20px; right:28px; font-size:12px; color:#999; }
+
+/* Bande latérale colorée sur chaque slide */
+.slide::after {
+  content:''; position:absolute; left:0; top:0; bottom:0;
+  width:6px; border-radius:0 3px 3px 0;
+}
+
+/* Slide 1 — Couverture */
+.s1 { background: #1e3a5f; color:#fff; }
+.s1::after { background:#4a9eca; }
+.s1 .surtitle { font-size:13px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.55); margin-bottom:20px; }
+.s1 h1 { font-size:42px; font-weight:300; line-height:1.25; max-width:780px; margin-bottom:28px; }
+.s1 h1 strong { font-weight:700; color:#7ec8e3; }
+.s1 .sous { font-size:16px; color:rgba(255,255,255,0.65); max-width:580px; line-height:1.7; margin-bottom:48px; }
+.s1 .meta { display:flex; gap:32px; }
+.s1 .meta span { font-size:13px; color:rgba(255,255,255,0.45); }
+.s1 .meta strong { color:rgba(255,255,255,0.75); }
+
+/* Slides 2-9 — fond clair */
+.s-light { background:#fff; }
+.s-light::after { background:#2d4a7a; }
+.s-light .chapitre { font-size:12px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#7a9cc0; margin-bottom:14px; }
+.s-light h2 { font-size:32px; font-weight:600; color:#1e3a5f; margin-bottom:10px; line-height:1.25; }
+.s-light .intro { font-size:15px; color:#666; line-height:1.7; max-width:700px; margin-bottom:32px; }
+
+/* Blocs points */
+.points { display:flex; flex-direction:column; gap:12px; }
+.point {
+  display:flex; align-items:flex-start; gap:16px;
+  padding:16px 20px;
+  border:1px solid #e8e6df; border-left:4px solid #2d4a7a;
+  border-radius:0 8px 8px 0; background:#fafaf7;
+}
+.point .num {
+  width:28px; height:28px; border-radius:50%;
+  background:#2d4a7a; color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700; flex-shrink:0;
+}
+.point .txt h4 { font-size:15px; font-weight:600; color:#1e3a5f; margin-bottom:3px; }
+.point .txt p { font-size:13px; color:#666; line-height:1.5; }
+
+/* Grille de stats */
+.stats { display:flex; gap:16px; margin-bottom:28px; }
+.stat {
+  flex:1; background:#f5f4f0; border:1px solid #e0dfd8;
+  border-top:3px solid #2d4a7a;
+  border-radius:8px; padding:18px 20px;
+}
+.stat .n { font-size:34px; font-weight:700; color:#1e3a5f; }
+.stat .l { font-size:12px; color:#888; margin-top:4px; line-height:1.4; }
+
+/* Grille 2 colonnes */
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.bloc {
+  padding:18px 20px; border:1px solid #e8e6df;
+  border-radius:8px; background:#fafaf7;
+}
+.bloc.accent { border-left:4px solid #4a9eca; border-radius:0 8px 8px 0; }
+.bloc.accent2 { border-left:4px solid #2d7a4a; border-radius:0 8px 8px 0; }
+.bloc.accent3 { border-left:4px solid #c06030; border-radius:0 8px 8px 0; }
+.bloc h4 { font-size:14px; font-weight:600; color:#1e3a5f; margin-bottom:8px; }
+.bloc ul { padding-left:16px; }
+.bloc ul li { font-size:13px; color:#555; line-height:1.6; }
+
+/* Slide 3 leviers */
+.leviers { display:flex; gap:14px; margin-top:8px; }
+.levier {
+  flex:1; padding:22px 20px;
+  border-radius:8px; text-align:center;
+  background:#f5f4f0; border:1px solid #ddd;
+}
+.levier .ico { font-size:28px; margin-bottom:12px; }
+.levier h4 { font-size:15px; font-weight:600; color:#1e3a5f; margin-bottom:8px; }
+.levier p { font-size:12px; color:#666; line-height:1.5; }
+
+/* Message final */
+.msg-final {
+  margin-top:24px; padding:20px 28px;
+  background:#1e3a5f; color:#fff;
+  border-radius:8px;
+  font-size:16px; font-weight:300; line-height:1.7;
+  font-style:italic;
+}
+.msg-final strong { font-weight:600; color:#7ec8e3; font-style:normal; }
+
+/* Slide conclusion */
+.s-conclu { background:#1e3a5f; color:#fff; }
+.s-conclu::after { background:#7ec8e3; }
+.s-conclu h2 { font-size:36px; font-weight:300; color:#fff; margin-bottom:32px; }
+.s-conclu h2 strong { color:#7ec8e3; font-weight:700; }
+.s-conclu .contacts { display:flex; gap:20px; margin-top:36px; }
+.s-conclu .cc {
+  flex:1; background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.2);
+  border-radius:8px; padding:20px 24px;
+}
+.s-conclu .cc .lbl { font-size:11px; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+.s-conclu .cc .val { font-size:16px; font-weight:600; color:#7ec8e3; }
+.s-conclu .note { font-size:13px; color:rgba(255,255,255,0.45); margin-top:28px; font-style:italic; }
+
+/* Tag slide */
+.slide-tag {
+  position:absolute; top:28px; left:80px;
+  font-size:11px; color:#aaa; letter-spacing:1px; text-transform:uppercase;
+}
+</style>
+</head>
+<body>
+
+<div class="pres">
+
+<!-- Slide 1 -->
+<div class="slide s1 active">
+  <div class="surtitle">Note stratégique · Action sociale</div>
+  <h1>Développer l'accueil familial en France :<br><strong>un impératif de société</strong></h1>
+  <p class="sous">Présentation à destination des équipes d'action sociale d'AG2R La Mondiale — Initiative d'intérêt général pour accompagner le vieillissement de la population.</p>
+  <div class="meta">
+    <span><strong>Famillys</strong> — Réseau national d'accueil familial pour personnes âgées</span>
+    <span><strong>2026</strong></span>
+  </div>
+</div>
+
+<!-- Slide 2 -->
+<div class="slide s-light">
+  <div class="slide-tag">Contexte</div>
+  <div class="chapitre">1 · Le défi du vieillissement</div>
+  <h2>Une transition démographique sans précédent</h2>
+  <p class="intro">La France fait face à un vieillissement accéléré de sa population. Les solutions d'hébergement traditionnelles montrent leurs limites face à l'ampleur du phénomène.</p>
+  <div class="stats">
+    <div class="stat"><div class="n">+60%</div><div class="l">d'augmentation du nombre de seniors dépendants attendue d'ici 2050</div></div>
+    <div class="stat"><div class="n">600 000</div><div class="l">places en EHPAD aujourd'hui, insuffisantes face aux besoins croissants</div></div>
+    <div class="stat"><div class="n">87%</div><div class="l">des personnes âgées souhaitent vieillir hors d'un établissement médicalisé</div></div>
+  </div>
+  <div class="points">
+    <div class="point"><div class="num">1</div><div class="txt"><h4>Le maintien à domicile isolé atteint ses limites</h4><p>Perte d'autonomie, isolement social, charge croissante sur les aidants familiaux</p></div></div>
+    <div class="point"><div class="num">2</div><div class="txt"><h4>Les EHPAD sont saturés et coûteux</h4><p>Reste à charge élevé, listes d'attente longues, modèle médicalisé inadapté à tous les profils</p></div></div>
+    <div class="point"><div class="num">3</div><div class="txt"><h4>Un vide entre domicile et établissement</h4><p>Des milliers de personnes âgées sans solution adaptée à leurs besoins réels</p></div></div>
+  </div>
+</div>
+
+<!-- Slide 3 -->
+<div class="slide s-light">
+  <div class="slide-tag">Contexte</div>
+  <div class="chapitre">2 · L'accueil familial</div>
+  <h2>Une solution humaine encore trop peu développée</h2>
+  <p class="intro">L'accueil familial existe depuis 1989 en France. C'est une réponse éprouvée, encadrée par la loi, mais structurellement sous-utilisée faute d'accueillants formés et accompagnés.</p>
+  <div class="grid2">
+    <div class="bloc accent">
+      <h4>Ce qu'est l'accueil familial</h4>
+      <ul>
+        <li>Une personne âgée accueillie au domicile d'une famille agréée</li>
+        <li>Maximum 3 personnes par accueillant</li>
+        <li>Un cadre légal rigoureux, contrôlé par les Conseils Départementaux</li>
+        <li>Une alternative conviviale, sécurisée et accessible</li>
+      </ul>
+    </div>
+    <div class="bloc accent3">
+      <h4>Les freins à son développement</h4>
+      <ul>
+        <li>Manque de notoriété auprès du grand public</li>
+        <li>Parcours d'agrément peu lisible et variable selon les territoires</li>
+        <li>Absence de filière structurée et professionnalisée</li>
+        <li>Inégalités territoriales fortes entre départements</li>
+      </ul>
+    </div>
+    <div class="bloc accent2">
+      <h4>Un potentiel considérable</h4>
+      <ul>
+        <li>10 000 accueillants familiaux agréés en France aujourd'hui</li>
+        <li>Un besoin estimé de 30 000 à 50 000 accueillants supplémentaires</li>
+        <li>Des territoires ruraux particulièrement concernés</li>
+      </ul>
+    </div>
+    <div class="bloc accent">
+      <h4>Un dispositif reconnu mais fragmenté</h4>
+      <ul>
+        <li>Chaque département recrute, forme et pilote seul</li>
+        <li>Aucune mutualisation nationale des bonnes pratiques</li>
+        <li>Une filière qui manque de structuration et de visibilité</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4 -->
+<div class="slide s-light">
+  <div class="slide-tag">Impact</div>
+  <div class="chapitre">3 · L'impact social de l'accueil familial</div>
+  <h2>Une réponse humaine aux besoins fondamentaux</h2>
+  <p class="intro">L'accueil familial répond à des besoins profonds : lien social, dignité, maintien de l'autonomie. Ses bénéfices sont documentés et multidimensionnels.</p>
+  <div class="points">
+    <div class="point"><div class="num">1</div><div class="txt"><h4>Qualité de vie et dignité retrouvées</h4><p>Cadre de vie familial, repas partagés, activités du quotidien — les personnes âgées conservent un rythme de vie proche du domicile</p></div></div>
+    <div class="point"><div class="num">2</div><div class="txt"><h4>Lutte contre l'isolement social</h4><p>Présence quotidienne, interactions avec l'accueillant et ses proches, maintien du lien avec la famille — facteur décisif pour le bien-être cognitif et moral</p></div></div>
+    <div class="point"><div class="num">3</div><div class="txt"><h4>Soulagement des aidants familiaux</h4><p>Les proches aidants retrouvent de la sérénité, savent leur parent entouré — 1 salarié sur 5 est en situation d'aidance aujourd'hui</p></div></div>
+    <div class="point"><div class="num">4</div><div class="txt"><h4>Ancrage territorial et emplois locaux</h4><p>Des emplois non délocalisables, exercés au cœur des territoires ruraux et périurbains, porteurs de lien social intergénérationnel</p></div></div>
+  </div>
+</div>
+
+<!-- Slide 5 -->
+<div class="slide s-light">
+  <div class="slide-tag">Opportunité</div>
+  <div class="chapitre">4 · L'opportunité</div>
+  <h2>Faire émerger de nouvelles vocations : un programme d'intérêt général</h2>
+  <p class="intro">Le principal verrou au développement de l'accueil familial n'est pas réglementaire — c'est l'absence de vocations identifiées, accompagnées et structurées. Un programme national peut changer cela.</p>
+  <div class="leviers">
+    <div class="levier">
+      <div class="ico">📣</div>
+      <h4>Sensibiliser</h4>
+      <p>Faire connaître le métier au grand public, aux reconversions professionnelles, aux retraités actifs</p>
+    </div>
+    <div class="levier">
+      <div class="ico">🤝</div>
+      <h4>Accompagner</h4>
+      <p>Guider les candidats de la première intention jusqu'à l'obtention de l'agrément départemental</p>
+    </div>
+    <div class="levier">
+      <div class="ico">🏗️</div>
+      <h4>Structurer</h4>
+      <p>Professionnaliser la filière, harmoniser les pratiques, créer des outils communs à l'échelle nationale</p>
+    </div>
+  </div>
+  <div class="msg-final">
+    Il ne s'agit pas de créer un nouveau dispositif, mais de <strong>donner enfin à un dispositif existant les moyens de se développer</strong> à la mesure des besoins.
+  </div>
+</div>
+
+<!-- Slide 6 -->
+<div class="slide s-light">
+  <div class="slide-tag">Programme</div>
+  <div class="chapitre">5 · Les trois leviers du programme</div>
+  <h2>Un programme structuré en trois axes complémentaires</h2>
+  <p class="intro">Chaque levier répond à un obstacle identifié dans le développement de l'accueil familial. Ensemble, ils forment un continuum de la vocation à l'exercice professionnel.</p>
+  <div class="points">
+    <div class="point">
+      <div class="num">1</div>
+      <div class="txt">
+        <h4>Sensibiliser au métier d'accueillant familial</h4>
+        <p>Campagnes de communication ciblées, témoignages d'accueillants, présence dans les réseaux d'action sociale, partenariats avec les caisses de retraite et les CPAM</p>
+      </div>
+    </div>
+    <div class="point">
+      <div class="num">2</div>
+      <div class="txt">
+        <h4>Accompagner les candidats jusqu'à l'agrément</h4>
+        <p>Information sur les démarches, préparation du dossier, mise en relation avec les services départementaux, coaching individuel — réduire le taux d'abandon à mi-parcours</p>
+      </div>
+    </div>
+    <div class="point">
+      <div class="num">3</div>
+      <div class="txt">
+        <h4>Structurer et professionnaliser la filière</h4>
+        <p>Harmonisation des formations, outils numériques partagés, réseau d'entraide entre accueillants, indicateurs de qualité mesurables — créer les conditions d'un exercice durable et reconnu</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7 -->
+<div class="slide s-light">
+  <div class="slide-tag">Impact potentiel</div>
+  <div class="chapitre">6 · L'impact potentiel</div>
+  <h2>Des retombées sociales, économiques et territoriales mesurables</h2>
+  <p class="intro">Le développement de l'accueil familial produit des effets positifs à plusieurs niveaux, dont certains sont directement quantifiables.</p>
+  <div class="grid2">
+    <div class="bloc accent2">
+      <h4>Création d'emplois locaux</h4>
+      <ul>
+        <li>Des emplois non délocalisables, exercés à domicile</li>
+        <li>Accessibles sans diplôme préalable, après formation</li>
+        <li>Porteurs de sens et de lien social intergénérationnel</li>
+        <li>Vecteurs de reconversion professionnelle durable</li>
+      </ul>
+    </div>
+    <div class="bloc accent">
+      <h4>Amélioration du bien-être des personnes âgées</h4>
+      <ul>
+        <li>Maintien d'un cadre de vie familial et personnalisé</li>
+        <li>Réduction de l'isolement et de ses conséquences sanitaires</li>
+        <li>Moindre recours aux urgences et à l'hospitalisation</li>
+      </ul>
+    </div>
+    <div class="bloc accent3">
+      <h4>Soutien aux territoires ruraux</h4>
+      <ul>
+        <li>Réponse aux déserts médico-sociaux</li>
+        <li>Maintien d'activité économique dans les communes rurales</li>
+        <li>Alternative aux EHPAD absents dans certains bassins de vie</li>
+      </ul>
+    </div>
+    <div class="bloc accent">
+      <h4>Réduction de la pression sur les finances publiques</h4>
+      <ul>
+        <li>Reste à charge inférieur de 30 à 50% par rapport à l'EHPAD</li>
+        <li>Moindre sollicitation de l'aide sociale à l'hébergement</li>
+        <li>Allègement de la charge des équipes départementales</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8 -->
+<div class="slide s-light">
+  <div class="slide-tag">Partenariat</div>
+  <div class="chapitre">7 · Le rôle des acteurs de l'action sociale</div>
+  <h2>Une démarche d'intérêt général qui appelle des partenaires engagés</h2>
+  <p class="intro">Le développement de l'accueil familial ne peut reposer sur les seuls acteurs publics. Les organismes de protection sociale ont un rôle naturel à jouer dans cette dynamique.</p>
+  <div class="points">
+    <div class="point"><div class="num">1</div><div class="txt"><h4>Informer et orienter leurs adhérents</h4><p>Faire connaître l'accueil familial comme solution d'hébergement auprès des assurés en situation de fragilité ou d'aidance</p></div></div>
+    <div class="point"><div class="num">2</div><div class="txt"><h4>Contribuer à l'émergence de vocations</h4><p>Relayer le programme de sensibilisation auprès des adhérents en reconversion, des retraités actifs et des aidants professionnels</p></div></div>
+    <div class="point"><div class="num">3</div><div class="txt"><h4>Participer à la structuration de la filière</h4><p>Co-construire des outils d'accompagnement, soutenir la formation, partager les données utiles au pilotage du dispositif</p></div></div>
+    <div class="point"><div class="num">4</div><div class="txt"><h4>Inscrire l'initiative dans leur politique RSE et d'impact</h4><p>Un engagement mesurable, visible, cohérent avec les valeurs de solidarité et de protection sociale portées par AG2R La Mondiale</p></div></div>
+  </div>
+</div>
+
+<!-- Slide 9 — Famillys -->
+<div class="slide s-light">
+  <div class="slide-tag">À propos</div>
+  <div class="chapitre">Famillys</div>
+  <h2>Un acteur engagé au service du développement de l'accueil familial</h2>
+  <p class="intro">Entreprise de l'Économie Sociale et Solidaire créée en 2020, Famillys accompagne les familles, les personnes âgées et les accueillants dans toutes les étapes du parcours d'accueil familial.</p>
+  <div class="grid2">
+    <div class="bloc accent">
+      <h4>Ce que nous faisons</h4>
+      <ul>
+        <li>Mise en relation familles / accueillants agréés</li>
+        <li>Accompagnement administratif, juridique et financier</li>
+        <li>Suivi mensuel des accueils en cours</li>
+        <li>Sensibilisation et développement du réseau d'accueillants</li>
+      </ul>
+    </div>
+    <div class="bloc accent2">
+      <h4>Nos engagements</h4>
+      <ul>
+        <li>Structure ESS — zéro dividende, zéro rémunération dirigeants</li>
+        <li>+1 900 familles accompagnées depuis 2020</li>
+        <li>Réseau de plus de 10 000 familles agréées en France</li>
+        <li>Présence nationale, ancrage territorial fort</li>
+      </ul>
+    </div>
+  </div>
+  <div class="msg-final" style="margin-top:20px;">
+    Famillys ne se substitue pas à l'action publique. <strong>Nous la rendons plus efficace et plus humaine.</strong>
+  </div>
+</div>
+
+<!-- Slide 10 — Conclusion -->
+<div class="slide s-conclu">
+  <div class="chapitre" style="color:rgba(255,255,255,0.45);margin-bottom:14px;">Prochaine étape</div>
+  <h2>Construire ensemble<br><strong>un programme d'intérêt général</strong></h2>
+  <p style="font-size:16px;color:rgba(255,255,255,0.65);max-width:620px;line-height:1.7;margin-bottom:32px;">Nous proposons d'engager un dialogue avec les équipes d'action sociale d'AG2R La Mondiale pour explorer les modalités d'un partenariat concret, à la mesure des enjeux.</p>
+  <div class="contacts">
+    <div class="cc"><div class="lbl">Contact</div><div class="val">contact@famillys.fr</div></div>
+    <div class="cc"><div class="lbl">Téléphone</div><div class="val">0801 27 00 90</div></div>
+    <div class="cc"><div class="lbl">Site</div><div class="val">famillys.fr</div></div>
+  </div>
+  <p class="note">Famillys — Entreprise de l'Économie Sociale et Solidaire · SIRET 88095666900019 · RCS Versailles</p>
+</div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prev" onclick="go(-1)" disabled>← Précédent</button>
+  <div class="dots" id="dots"></div>
+  <button id="next" onclick="go(1)">Suivant →</button>
+</div>
+<div class="counter" id="ctr">1 / 10</div>
+
+<script>
+let cur=0;
+const slides=document.querySelectorAll('.slide'), n=slides.length;
+const dotsEl=document.getElementById('dots');
+for(let i=0;i<n;i++){const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>goTo(i);dotsEl.appendChild(d);}
+function goTo(i){slides[cur].classList.remove('active');document.querySelectorAll('.dot')[cur].classList.remove('active');cur=i;slides[cur].classList.add('active');document.querySelectorAll('.dot')[cur].classList.add('active');document.getElementById('prev').disabled=cur===0;document.getElementById('next').disabled=cur===n-1;document.getElementById('ctr').textContent=(cur+1)+' / '+n;}
+function go(d){goTo(cur+d);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'&&cur<n-1)goTo(cur+1);if(e.key==='ArrowLeft'&&cur>0)goTo(cur-1);});
+</script>
+</body>
+</html>
